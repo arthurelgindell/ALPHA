@@ -1,0 +1,14 @@
+#!/bin/bash
+# ARTHUR CLI wrapper
+# Usage: arthur carousel "topic" | arthur video --duration 30 "topic" | arthur status
+
+# Get the directory containing this script
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+
+# Use Python 3.11 (required for modern type hints)
+PYTHON="/opt/homebrew/bin/python3.11"
+
+# Run the Python module
+cd "$PROJECT_ROOT"
+exec "$PYTHON" -m arthur "$@"

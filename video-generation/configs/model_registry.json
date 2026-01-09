@@ -1,0 +1,55 @@
+{
+  "models": [
+    {
+      "name": "wan_2_2_a14b",
+      "version": "1.0",
+      "parameters": "14B MoE",
+      "architecture": "MoE (Mixture-of-Experts)",
+      "license": "Apache 2.0",
+      "source": "Wan-AI/Wan2.2-T2V-A14B",
+      "file_size_gb": 30.0,
+      "quality_score": 84.7,
+      "performance": {
+        "720p_5s": "3-5min",
+        "720p_30s": "15-20min"
+      },
+      "active": true,
+      "added_date": "2025-12-31T12:40:14.590980",
+      "last_benchmarked": null
+    },
+    {
+      "name": "hunyuanvideo_1_5",
+      "version": "1.5",
+      "parameters": "8.3B",
+      "architecture": "SSTA (Spatial-Temporal Self-Attention)",
+      "license": "Apache 2.0",
+      "source": "tencent/HunyuanVideo-1.5",
+      "file_size_gb": 20.0,
+      "quality_score": 82.0,
+      "performance": {
+        "720p_5s": "10-15min"
+      },
+      "active": false,
+      "added_date": "2025-12-31T12:40:14.591262",
+      "last_benchmarked": null
+    },
+    {
+      "name": "mochi_1",
+      "version": "1.0",
+      "parameters": "10B",
+      "architecture": "AsymmDiT (Asymmetric Diffusion Transformer)",
+      "license": "Apache 2.0",
+      "source": "genmoai/mochi-1",
+      "file_size_gb": 40.0,
+      "quality_score": 80.0,
+      "performance": {
+        "720p_5s": "5-8min"
+      },
+      "active": false,
+      "added_date": "2025-12-31T12:40:14.591655",
+      "last_benchmarked": null
+    }
+  ],
+  "benchmarks": [],
+  "last_updated": "2025-12-31T12:40:14.591851"
+}

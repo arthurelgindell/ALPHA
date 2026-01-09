@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Video Generator - Replicate API Backend
-High-level interface for generating videos via Replicate API
+Video Generator - Local HunyuanVideo Backend
+High-level interface for local video generation via HunyuanVideo MPS
 """
 
 import logging
@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Optional
 from dataclasses import dataclass
 
-from replicate_backend import ReplicateBackend, ReplicateVideoConfig
+from hunyuan_backend import HunyuanBackend, HunyuanVideoConfig
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -42,35 +42,36 @@ class VideoConfig:
 
 class VideoGenerator:
     """
-    High-level interface for video generation via Replicate API
+    High-level interface for local video generation via HunyuanVideo
 
-    Handles quality optimization and multi-format support
+    Handles quality optimization and multi-format support.
+    Uses PyTorch MPS backend for Apple Silicon GPU acceleration.
     """
 
     def __init__(self,
-                 api_token: Optional[str] = None,
+                 model_path: str = "/Users/arthurdell/ARTHUR/video-generation/HunyuanVideo_MLX",
                  output_dir: str = "/Users/arthurdell/ARTHUR/videos/raw"):
         """
         Initialize video generator
 
         Args:
-            api_token: Replicate API token (or set REPLICATE_API_TOKEN env var)
+            model_path: Path to HunyuanVideo model files
             output_dir: Output directory for videos
         """
-        self.backend = ReplicateBackend(api_token=api_token)
+        self.backend = HunyuanBackend(model_path=model_path)
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
-        logger.info("Video Generator initialized (Replicate backend)")
+        logger.info("Video Generator initialized (HunyuanVideo MPS backend)")
 
     def _map_quality_to_steps(self, quality: str) -> int:
         """Map quality density to inference steps"""
         steps_map = {
-            "high": 30,     # High quality, slower
-            "medium": 20,   # Balanced
-            "low": 15       # Fast preview
+            "high": 50,     # High quality, slower
+            "medium": 40,   # Balanced (default)
+            "low": 30       # Fast preview
         }
-        return steps_map.get(quality.lower(), 20)
+        return steps_map.get(quality.lower(), 40)
 
     def generate(self, config: VideoConfig) -> Path:
         """
@@ -86,7 +87,7 @@ class VideoGenerator:
             Exception: If video generation fails
         """
         logger.info("="*60)
-        logger.info("STARTING VIDEO GENERATION")
+        logger.info("STARTING LOCAL VIDEO GENERATION")
         logger.info("="*60)
         logger.info(f"Prompt: {config.prompt}")
         logger.info(f"Format: {config.format.name} ({config.format.width}x{config.format.height})")
@@ -105,31 +106,29 @@ class VideoGenerator:
             safe_prompt = safe_prompt.replace(" ", "_").lower()
             output_path = self.output_dir / f"{safe_prompt}_{config.format.width}x{config.format.height}.mp4"
 
-        # Create Replicate config
-        replicate_config = ReplicateVideoConfig(
+        # Create HunyuanVideo config
+        hunyuan_config = HunyuanVideoConfig(
             prompt=config.prompt,
             height=config.format.height,
             width=config.format.width,
-            num_frames=num_frames,
+            video_length=num_frames,
             fps=config.format.fps,
-            num_inference_steps=self._map_quality_to_steps(config.quality_density),
-            guidance_scale=4.0,
+            infer_steps=self._map_quality_to_steps(config.quality_density),
+            guidance_scale=7.0,
             output_path=str(output_path)
         )
 
-        # Estimate cost
-        estimated_cost = self.backend.estimate_cost(replicate_config)
-        logger.info(f"Estimated cost: ${estimated_cost:.2f}")
+        # Estimate generation time
+        self.backend.estimate_time(hunyuan_config)
 
         # Generate video
-        video_path = self.backend.generate(replicate_config)
+        video_path = self.backend.generate(hunyuan_config)
 
         logger.info("")
         logger.info("="*60)
         logger.info("✅ VIDEO GENERATION COMPLETE")
         logger.info("="*60)
         logger.info(f"Location: {video_path}")
-        logger.info(f"Cost: ~${estimated_cost:.2f}")
         logger.info("")
 
         return video_path
@@ -200,4 +199,5 @@ class VideoGenerator:
 
     def close(self):
         """Cleanup resources"""
+        self.backend.close()
         logger.info("Video generator closed")
